@@ -1,0 +1,182 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #8A2BE2;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: #f8f9fa;
+}
+
+:root {
+  --primary-color: #8A2BE2;
+  --primary-hover: #7026b9;
+  --primary-light: #e9d8fc;
+  --success-color: #25b070;
+}
+
+.green-theme {
+  --primary-color: #8A2BE2;
+  --primary-hover: #7026b9;
+  --primary-light: #e9d8fc;
+  --success-color: #25b070;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: var(--primary-light);
+  color: var(--primary-hover);
+  border-color: var(--primary-color);
+}
+
+/* Custom styles for the salary calculator */
+.card {
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  border: 1px solid #e5e5e5;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
+
+.card-header h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.form-label {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.form-label.fw-bold {
+  color: #333;
+  font-weight: 500 !important; 
+}
+
+.form-select, .form-control {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.salary-type-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.btn-group label.btn {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-bottom: 2px solid #e5e5e5;
+  color: #444;
+  padding: 10px 8px;
+}
+
+.table tbody td {
+  padding: 8px;
+  font-size: 0.85rem;
+  border-color: #e5e5e5;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+.alert-success {
+  background-color: #ebf9f1;
+  border-color: #c5e7d4;
+  color: #226d4c;
+}
+
+.table-responsive {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* Kariyer.net benzeri ek stiller */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #fbfbfb;
+}
+
+.table-hover > tbody > tr:hover {
+  background-color: #f5f5f5;
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}

@@ -1,0 +1,258 @@
+@model SalaryCalculation.Models.SalaryCalculationViewModel
+
+@{
+    ViewData["Title"] = "Maaş Hesaplama";
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="text-center mb-4">Maaş Hesaplama</h1>
+                <hr />
+                <form asp-controller="Salary" asp-action="Calculate" method="post" id="salaryForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Maaş Türü</label>
+                            <div class="salary-type-container">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="IsSalaryGross" id="option1" value="true" @(Model.IsSalaryGross ? "checked" : "") autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="option1">Brütten Nete</label>
+
+                                    <input type="radio" class="btn-check" name="IsSalaryGross" id="option2" value="false" @(!Model.IsSalaryGross ? "checked" : "") autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="option2">Netten Brüte</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Salary" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <input asp-for="Salary" class="form-control" id="Salary" required />
+                                <span class="input-group-text">@Model.CurrencySymbol</span>
+                            </div>
+                            <span asp-validation-for="Salary" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Year" class="form-label fw-bold"></label>
+                            <select asp-for="Year" asp-items="Model.YearOptions" class="form-select" id="Year" required>
+                                <option value="">-- Yıl Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="Year" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="StartMonth" class="form-label fw-bold"></label>
+                            <select asp-for="StartMonth" asp-items="Model.MonthOptions" class="form-select" id="StartMonth" required>
+                                <option value="">-- Ay Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="StartMonth" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                            <button type="button" id="calculateButton" class="btn btn-primary w-100">
+                                <i class="fas fa-calculator"></i> Hesapla
+                            </button>
+                            <div id="loadingIndicator" class="d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Hesaplanıyor...</span>
+                                </div>
+                                <span class="ms-2">Hesaplanıyor...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input asp-for="ShowEmployerCost" class="form-check-input" type="checkbox" id="ShowEmployerCost" />
+                                <label asp-for="ShowEmployerCost" class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.CalculationResult != null)
+{
+    <div class="alert alert-success mt-3">
+        Hesaplama başarılı! Sonuçlar aşağıda gösterilmektedir.
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        @if (Model.IsSalaryGross)
+                        {
+                            <span>Brütten Nete Maaş Hesabı (@Model.Salary.ToString("N2") @Model.CurrencySymbol)</span>
+                        }
+                        else
+                        {
+                            <span>Netten Brüte Maaş Hesabı (@Model.Salary.ToString("N2") @Model.CurrencySymbol)</span>
+                        }
+                    </h5>
+                    <a asp-action="ExportToExcel" asp-route-id="@Model.CalculationResult.Id" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-file-excel"></i> Excel'e Aktar
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Ay</th>
+                                    <th>Brüt Ücret</th>
+                                    <th>İşçi SGK Primi</th>
+                                    <th>İşçi İşsizlik Sigortası</th>
+                                    <th>Vergi Matrahı</th>
+                                    <th>Damga Vergisi</th>
+                                    <th>Gelir Vergisi</th>
+                                    <th>KGVM*</th>
+                                    <th>Asgari Ücret Gelir Vergisi İndirimi</th>
+                                    <th>Net Ücret</th>
+                                    @if (Model.CalculationResult.ShowEmployerCost)
+                                    {
+                                        <th>İşveren SGK Primi</th>
+                                        <th>İşveren İşsizlik Sigortası</th>
+                                        <th>Toplam İşveren Maliyeti</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in Model.CalculationResult.SalaryDetails.OrderBy(d => d.Order))
+                                {
+                                    <tr>
+                                        <td>@detail.MonthName.ToUpper()</td>
+                                        <td>@detail.GrossSalary.ToString("N2")</td>
+                                        <td>@detail.SgkEmployeeAmount.ToString("N2")</td>
+                                        <td>@detail.UnemploymentEmployeeAmount.ToString("N2")</td>
+                                        <td>@detail.TaxBase.ToString("N2")</td>
+                                        <td>@detail.StampTax.ToString("N2")</td>
+                                        <td>@detail.IncomeTax.ToString("N2")</td>
+                                        <td>@detail.CumulativeIncomeTax.ToString("N2")</td>
+                                        <td>@detail.MinimumWageTaxDiscount.ToString("N2")</td>
+                                        <td class="fw-bold">@detail.NetSalary.ToString("N2")</td>
+                                        @if (Model.CalculationResult.ShowEmployerCost)
+                                        {
+                                            <td>@detail.SgkEmployerAmount.ToString("N2")</td>
+                                            <td>@detail.UnemploymentEmployerAmount.ToString("N2")</td>
+                                            <td class="fw-bold">@detail.TotalEmployerCost.ToString("N2")</td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted p-2">
+                        <small>* KGVM = Kümülatif Gelir Vergisi Matrahı</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Format currency input
+            $("#Salary").on("input", function() {
+                var value = $(this).val().replace(/[^\d.]/g, '');
+                $(this).val(value);
+            });
+            
+            // Enable form validation
+            var form = $("#salaryForm");
+            form.removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse(form);
+            
+            // Form submit with JavaScript
+            $("#calculateButton").on("click", function(e) {
+                e.preventDefault();
+                
+                // Validate the form fields first
+                var valid = form.valid();
+                
+                if (!valid) {
+                    // Form is not valid, show validation messages
+                    return;
+                }
+                
+                if (!$("#Salary").val()) {
+                    alert("Lütfen maaş miktarı giriniz!");
+                    $("#Salary").focus();
+                    return;
+                }
+                
+                if (!$("#Year").val()) {
+                    alert("Lütfen yıl seçiniz!");
+                    $("#Year").focus();
+                    return;
+                }
+                
+                if (!$("#StartMonth").val()) {
+                    alert("Lütfen başlangıç ayı seçiniz!");
+                    $("#StartMonth").focus();
+                    return;
+                }
+                
+                // Show loading indicator
+                $("#calculateButton").addClass("d-none");
+                $("#loadingIndicator").removeClass("d-none");
+                
+                // Submit form with ajax to prevent page refresh if there are errors
+                $.ajax({
+                    type: "POST",
+                    url: form.attr("action"),
+                    data: form.serialize(),
+                    success: function(response) {
+                        // Check if the response contains result data
+                        if (response.indexOf("Hesaplama başarılı") !== -1) {
+                            // Replace the entire page with the response
+                            document.open();
+                            document.write(response);
+                            document.close();
+                            window.history.pushState({}, '', form.attr("action"));
+                        } else {
+                            // Handle validation errors or other issues
+                            document.open();
+                            document.write(response);
+                            document.close();
+                            window.history.pushState({}, '', form.attr("action"));
+                            
+                            // Hide loading indicator and show button
+                            $("#calculateButton").removeClass("d-none");
+                            $("#loadingIndicator").addClass("d-none");
+                        }
+                    },
+                    error: function() {
+                        // Show error message
+                        alert("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.");
+                        
+                        // Hide loading indicator and show button
+                        $("#calculateButton").removeClass("d-none");
+                        $("#loadingIndicator").addClass("d-none");
+                    }
+                });
+            });
+        });
+    </script>
+} 
